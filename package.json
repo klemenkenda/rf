@@ -4,6 +4,7 @@
   "description": "RandomForests implementation in JS.",
   "main": "index.js",
   "scripts": {
+    "start": "echo NPM start && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/klemenkenda/rf/issues"
   },
-  "homepage": "https://github.com/klemenkenda/rf#readme"
+  "homepage": "https://github.com/klemenkenda/rf#readme",
+  "dependencies": {
+    "csv": "^1.1.0",
+    "qminer": "^7.7.0"
+  }
 }
