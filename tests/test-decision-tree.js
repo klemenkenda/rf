@@ -73,6 +73,7 @@ describe("RFDecisionTree", function() {
         var datasetSplit = {
             index: 2,
             value: 2, 
+            score: 0,
             groups: [
                 [
                     { "value": 1, "data": [1, 1, 1] },
@@ -110,4 +111,32 @@ describe("RFDecisionTree", function() {
         assert.equal(rfTree.to_terminal(d3), -1);
         done();
     });
+
+    it ("Check split()", function(done) {
+        var datasetSplit = {
+            index: 2,
+            value: 2, 
+            score: 0.44444444444445, 
+            groups: [
+                [
+                    { "value": 1, "data": [1, 1, 1] },
+                ],
+                [
+                    { "value": -1, "data": [2, 1, 2] },
+                    { "value": -1, "data": [1, 1, 2] },
+                    { "value": 1, "data": [1, 1, 3] },
+                ]
+            ]
+        }
+
+        var rfTree = new rf.RFDecisionTree();
+        rfTree.split(datasetSplit, 3, 1, 3, 1);   
+        console.log("Decision tree: ", datasetSplit);     
+        done();
+    });
+
+    it ("Check fit(X, y)", function(done) {
+        // TODO
+        done();
+    })
 });

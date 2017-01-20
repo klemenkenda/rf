@@ -2,14 +2,28 @@ exports.RFDecisionTree = function() {
     
 	// instead of a constructor
 	// max_depth, min_size, sample_size, n_trees, n_features
-
+	this.tree = [];
 
 	this.fit = function(X, y) {
-		// TODO
-		// build dataset from X, y
+		// build dataset from X, y; we want to keep them together for easier splitting
+
+		// check sizes
+		if (X.length != y.length) {
+			console.log("Length of attribute matrix not equal to length of target value vector");
+			return;
+		}
+
+		var dataset = [];
+		for (i in X) {
+			var value = y[i];
+			var attributes = X[i];
+			dataset.push({ "value": value, "data": attributes });
+		}
 		
-		var root = get_split(dataset, this.n_features);
-		split(root, this.max_depth, this.min_size, this.n_features, 1);
+		// get first split
+		this.tree = get_split(dataset, this.n_features);
+		split(this.tree, this.max_depth, this.min_size, this.n_features, 1);
+		console.log(this.tree);
 	}
 
 	this.setParams = function(max_depth, min_size, sample_size, n_trees, n_features) {
@@ -33,10 +47,6 @@ exports.RFDecisionTree = function() {
     // predict(X)
     // getModel()
     // save(fout)
-
-	// TODO: spliting criteria for regression is
-	// RSS - \sum_left (y_i - y_L*)^2 + \sum_right (y_i - y_R*)^2
-	// y_L* is mean value of left node
 
 	this.gini_index = function(groups, class_values) {
         var gini = 0.0;
@@ -102,9 +112,10 @@ exports.RFDecisionTree = function() {
 
 		var features = [];		
 		var n_items = dataset.length;
+		var n_allfeatures = dataset[0]["data"].length;
 
 		while (features.length < n_features) {
-			var index = Math.floor((Math.random() * n_items));
+			var index = Math.floor((Math.random() * n_allfeatures));
 			if (features.indexOf(index) == -1) {
 				features.push(index);				
 			}			
@@ -124,7 +135,7 @@ exports.RFDecisionTree = function() {
 				}
 			}
 		}
-		return { 'index': b_index, 'value': b_value, 'groups': b_groups };
+		return { 'index': b_index, 'value': b_value, 'score': b_score, 'groups': b_groups };
     }
 
 	this.to_terminal = function(group) {
@@ -149,9 +160,50 @@ exports.RFDecisionTree = function() {
 	}
 
 	this.split = function(node, max_depth, min_size, n_features, depth) {
+		var left = node["groups"][0];
+		var right = node["groups"][1];
+		delete node["groups"];
 		
-	}
+		// check for a no split
+		if ((left == []) || (right == [])) {
+			console.log("One null.");
+			var both = left.concat(right);
+			node['left'] = this.to_terminal(both);
+			node['right'] = this.to_terminal(both);
+			return;
+		}
 
+		// check for max depth
+		if (depth >= max_depth) {
+			node['left'] = this.to_terminal(left);
+			node['right'] = this.to_terminal(right);
+			return;
+		}
+
+		console.log("Left", left);
+		console.log("Right", right);
+
+		// process left child
+		if (left.length <= min_size) {
+			console.log("Left terminal.");
+			node['left'] = this.to_terminal(left);			
+		} else {
+			console.log("Left - non-terminal.");
+			node['left'] = this.get_split(left, n_features);
+			this.split(node['left'], max_depth, min_size, n_features, depth + 1);
+		}
+
+		// process right child
+		if (right.length <= min_size) {
+			console.log("Right - terminal.");
+			node['right'] = this.to_terminal(right);
+		} else {
+			console.log("Right - non-terminal.");
+			node['right'] = this.get_split(right, n_features);
+			console.log("Get-split: done.");
+			this.split(node['right'], max_depth, min_size, n_features, depth + 1);
+		}		
+	}
 }
 
 
