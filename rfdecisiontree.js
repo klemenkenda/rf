@@ -4,13 +4,13 @@ exports.RFDecisionTree = function() {
 	// max_depth, min_size, sample_size, n_trees, n_features
 
 
-    this.fit = function(X, y) {
+	this.fit = function(X, y) {
 		// TODO
 		// build dataset from X, y
 		
 		var root = get_split(dataset, this.n_features);
 		split(root, this.max_depth, this.min_size, this.n_features, 1);
-    }
+	}
 
 	this.setParams = function(max_depth, min_size, sample_size, n_trees, n_features) {
 		this.max_depth = max_depth;
@@ -38,7 +38,7 @@ exports.RFDecisionTree = function() {
 	// RSS - \sum_left (y_i - y_L*)^2 + \sum_right (y_i - y_R*)^2
 	// y_L* is mean value of left node
 
-    this.gini_index = function(groups, class_values) {
+	this.gini_index = function(groups, class_values) {
         var gini = 0.0;
         for (class_valuei in class_values) {
 			class_value = class_values[class_valuei];
@@ -53,12 +53,12 @@ exports.RFDecisionTree = function() {
                     };
                     var proportion = sum / size;
                     gini += (proportion * (1.0 - proportion));					
-                }
-            }
-        }
+				}
+			}
+		}
 
-        return gini;
-    }
+		return gini;
+	}
 
 	// finds a set of unique values of y
 	this.unique = function(y) {
@@ -77,7 +77,7 @@ exports.RFDecisionTree = function() {
 
 		for (rowi in dataset) {
 			row = dataset[rowi];
-			if (row[index] < value) {
+			if (row["data"][index] < value) {
 				left.push(row);
 			} else {
 				right.push(row);
@@ -87,34 +87,38 @@ exports.RFDecisionTree = function() {
 		return [ left, right ];
 	}
 
-    this.get_split = function(dataset, n_features) {
+	this.get_split = function(dataset, n_features) {
+		// put class values into a separate array
+		var y = [];
+		for (i in dataset) {
+			y.push(dataset[i]["value"]);
+		}
 		// all possible classes in y
-		var class_values = unique(y);
+		var class_values = this.unique(y);
 		var b_index = 999;
 		var b_value = 999;
 		var b_score = 999;
 		var b_groups = null;
 
-		var features = {};		
-		var n_items = X.length;
+		var features = [];		
+		var n_items = dataset.length;
 
 		while (features.length < n_features) {
-			var index = Math.floor((Math.random() * n_items) + 1);
-			// TODO: check (!)
-			if (!(index in features)) {
-				features.push(index);
+			var index = Math.floor((Math.random() * n_items));
+			if (features.indexOf(index) == -1) {
+				features.push(index);				
 			}			
 		}
 
 		for (i in features) {
-			var index = features[i];
+			var index = features[i];			
 			for (rowi in dataset) {
 				row = dataset[rowi];
-				groups = test_split(index, row[index], dataset);				
-				gini = gini_index(groups, class_values);
+				groups = this.test_split(index, row["data"][index], dataset);				
+				gini = this.gini_index(groups, class_values);				
 				if (gini < b_score) {
 					b_index = index;
-					b_value = row[index];
+					b_value = row["data"][index];
 					b_score = gini;
 					b_groups = groups;
 				}

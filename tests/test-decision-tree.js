@@ -43,12 +43,45 @@ describe("RFDecisionTree", function() {
     });
 
     it ("Testing test_split", function(done) {
-        // TODO
+        var dataset = [
+            { "value": 1, "data": [1, 1, 1] },
+            { "value": -1, "data": [2, 1, 2] },
+            { "value": -1, "data": [1, 1, 2] }
+        ];
+
+        var datasetSplit = [
+            [
+                { "value": 1, "data": [1, 1, 1] },
+                { "value": -1, "data": [1, 1, 2] }
+            ],
+            [
+                { "value": -1, "data": [2, 1, 2] }            
+            ]
+        ];
+        var rfTree = new rf.RFDecisionTree();
+        assert.deepEqual(rfTree.test_split(0, 1.5, dataset), datasetSplit);
         done();
     });
 
     it ("Testing get_split", function(done) {
-        // TODO
+        var dataset = [
+            { "value": 1, "data": [1, 1, 1] },
+            { "value": -1, "data": [2, 1, 2] },
+            { "value": -1, "data": [1, 1, 2] }
+        ];
+
+        var datasetSplit = [
+            [
+                { "value": 1, "data": [1, 1, 1] },
+                { "value": -1, "data": [1, 1, 2] }
+            ],
+            [
+                { "value": -1, "data": [2, 1, 2] }            
+            ]
+        ];
+        var rfTree = new rf.RFDecisionTree();
+        console.log(rfTree.get_split(dataset, 3)["groups"]);
+        assert.deepEqual(rfTree.get_split(dataset, 3), datasetSplit);
         done();
     })
 });
