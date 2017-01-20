@@ -70,18 +70,44 @@ describe("RFDecisionTree", function() {
             { "value": -1, "data": [1, 1, 2] }
         ];
 
-        var datasetSplit = [
-            [
-                { "value": 1, "data": [1, 1, 1] },
-                { "value": -1, "data": [1, 1, 2] }
-            ],
-            [
-                { "value": -1, "data": [2, 1, 2] }            
+        var datasetSplit = {
+            index: 2,
+            value: 2, 
+            groups: [
+                [
+                    { "value": 1, "data": [1, 1, 1] },
+                ],
+                [
+                    { "value": -1, "data": [2, 1, 2] },
+                    { "value": -1, "data": [1, 1, 2] }                    
+                ]
             ]
-        ];
+        }
         var rfTree = new rf.RFDecisionTree();
-        console.log(rfTree.get_split(dataset, 3)["groups"]);
         assert.deepEqual(rfTree.get_split(dataset, 3), datasetSplit);
         done();
-    })
+    });
+
+    it ("Testing to_terminal", function(done) {
+        var d1 = [
+            { "value": 1, "data": [1, 1, 1] },
+        ];
+
+        var d2 = [
+            { "value": -1, "data": [2, 1, 2] },
+            { "value": -1, "data": [1, 1, 2] }                    
+        ];
+
+        var d3 = [
+            { "value": 1, "data": [1, 1, 1] },
+            { "value": -1, "data": [2, 1, 2] },
+            { "value": -1, "data": [1, 1, 2] }
+        ];
+
+        var rfTree = new rf.RFDecisionTree();
+        assert.equal(rfTree.to_terminal(d1), 1);
+        assert.equal(rfTree.to_terminal(d2), -1);
+        assert.equal(rfTree.to_terminal(d3), -1);
+        done();
+    });
 });
