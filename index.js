@@ -11,7 +11,7 @@ function createBase() {
     let fields = [];
     // dynamically create fields
     for (let i = 0; i < 60; i++) {
-    fields.push({ "name": "A" + i, "type": "float"}); 
+        fields.push({ "name": "A" + i, "type": "float"}); 
     }
     fields.push({ "name": "Value", "type": "float"});
 
@@ -37,16 +37,28 @@ var base = createBase();
 let buffer = fs.readFileSync('data/sonar.all-data.csv');
 let data = buffer;
 
+var X = [];
+var y = [];
+
 csv.parse(data, function(err, csvdata) {
     if (err) console.log(err);
     data = transformCSV(csvdata);
     // console.log(data);
+
+    var rfTree = new rf.RFDecisionTree();
+
+    console.log(X);
+    console.log(y);
+
+    rfTree.fit(X, y)
 });
 
+
 function transformCSV(csvdata) {
-    let data = [];
+    var data = [];
     for (var i in csvdata) {
-        let row = {};        
+        var row = {}; 
+        var rowV = [];       
         for (var j in csvdata[i]) {
             var c = csvdata[i][j];
             var x = parseFloat(csvdata[i][j]);
@@ -55,11 +67,17 @@ function transformCSV(csvdata) {
                 if (c == "M") x = 1.0;
                 if (c == "R") x = -1.0;
             }
-            if (j < 60) row["A" + j] = x;
-            else row["Value"] = x;
+            if (j < 60) {
+                row["A" + j] = x;
+                rowV.push(x);
+            } else {
+                row["Value"] = x;
+                y.push(x);
+            }
         }
         base.store("Sonar").push(row);
         data.push(row);
+        X.push(rowV);
     }
 
     return data;
@@ -74,4 +92,3 @@ class RF {
 // base.store("Sonar").push()
 // var rforest = new rf.RF();
 // console.log(rf);
-var rftree = new rf.RFDecisionTree();

@@ -1,8 +1,13 @@
-exports.RFDecisionTree = function() {
+exports.RFDecisionTree = function(max_depth = 20, min_size = 1, n_features = -1) {
     
 	// instead of a constructor
 	// max_depth, min_size, sample_size, n_trees, n_features
 	this.tree = [];
+
+	// set default params
+	this.max_depth = max_depth;
+	this.min_size = min_size;
+	this.n_features = n_features;
 
 	this.fit = function(X, y) {
 		// build dataset from X, y; we want to keep them together for easier splitting
@@ -13,6 +18,17 @@ exports.RFDecisionTree = function() {
 			return;
 		}
 
+		// check number of features
+		if (X[0].length < this.n_features) {
+			console.log("Not enough features: " + X[0].length + " < " + this.n_features);
+			return;
+		}
+
+		// is n_features -1 (means - use all features?)
+		if (this.n_features == -1) {
+			this.n_features = X[0].length;
+		}
+
 		var dataset = [];
 		for (i in X) {
 			var value = y[i];
@@ -20,17 +36,17 @@ exports.RFDecisionTree = function() {
 			dataset.push({ "value": value, "data": attributes });
 		}
 		
+		console.log(dataset);
 		// get first split
-		this.tree = get_split(dataset, this.n_features);
-		split(this.tree, this.max_depth, this.min_size, this.n_features, 1);
+		this.tree = this.get_split(dataset, this.n_features);
+		console.log(this.tree);
+		this.split(this.tree, this.max_depth, this.min_size, this.n_features, 1);
 		console.log(this.tree);
 	}
 
-	this.setParams = function(max_depth, min_size, sample_size, n_trees, n_features) {
+	this.setParams = function(max_depth, min_size, n_features) {
 		this.max_depth = max_depth;
 		this.min_size = min_size;
-		this.sample_size = sample_size;
-		this.n_trees = n_trees;
 		this.n_features = n_features;
 	}
 
@@ -38,8 +54,6 @@ exports.RFDecisionTree = function() {
 		return {
 			max_depth: this.max_depth,
 			min_size: this.min_size,
-			sample_size: this.sample_size,
-			n_trees: this.n_trees,
 			n_features: this.n_features
 		}
 	}
@@ -103,6 +117,7 @@ exports.RFDecisionTree = function() {
 		for (i in dataset) {
 			y.push(dataset[i]["value"]);
 		}
+
 		// all possible classes in y
 		var class_values = this.unique(y);
 		var b_index = 999;
@@ -165,7 +180,7 @@ exports.RFDecisionTree = function() {
 		delete node["groups"];
 		
 		// check for a no split
-		if ((left == []) || (right == [])) {
+		if ((left.length == 0) || (right.length == 0)) {
 			console.log("One null.");
 			var both = left.concat(right);
 			node['left'] = this.to_terminal(both);
@@ -179,9 +194,6 @@ exports.RFDecisionTree = function() {
 			node['right'] = this.to_terminal(right);
 			return;
 		}
-
-		console.log("Left", left);
-		console.log("Right", right);
 
 		// process left child
 		if (left.length <= min_size) {
@@ -200,10 +212,28 @@ exports.RFDecisionTree = function() {
 		} else {
 			console.log("Right - non-terminal.");
 			node['right'] = this.get_split(right, n_features);
-			console.log("Get-split: done.");
 			this.split(node['right'], max_depth, min_size, n_features, depth + 1);
 		}		
 	}
-}
 
+	this.predictRow = function(x) {
+		return this.predictNode(this.tree, x);
+	}
+
+	this.predictNode = function(node, x) {
+		if (x[node['index']] < node['value']) {
+			if (typeof(node['left']) === 'object') {
+				return this.predictNode(node['left'], x);
+			} else {
+				return node['left'];
+			}
+		} else {
+			if (typeof(node['right']) === 'object') {
+				return this.predictNode(node['right'], x);
+			} else {
+				return node['right'];
+			}
+		}
+	}
+}
 

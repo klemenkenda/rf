@@ -135,8 +135,26 @@ describe("RFDecisionTree", function() {
         done();
     });
 
-    it ("Check fit(X, y)", function(done) {
-        // TODO
+    it ("Check predictRow(x)", function(done) {
+        var X = [
+            [1, 1, 3],
+            [2, 1, 2],
+            [1, 1, 2]
+        ];
+
+        var y = [
+            1,
+            -1,
+            -1
+        ];
+
+        rfTree = new rf.RFDecisionTree();
+        // rfTree.setParams(5, 1, 1, 3);
+        rfTree.fit(X, y);
+        assert.equal(rfTree.predictRow([1, 1, 3]), 1);
+        assert.equal(rfTree.predictRow([1, 1, 2]), -1);
         done();
-    })
+    });
+
+
 });
